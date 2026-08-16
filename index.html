@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Al-Khayr EFB Tournament</title>
+<meta name="description" content="Al-Khayr EFB Tournament Management System — live fixtures, results and standings." />
+<meta name="theme-color" content="#090d16" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="favicon.ico" sizes="any" />
+<link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Al-Khayr EFB" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Loading screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="crest"></div>
+  <span>Loading tournament&hellip;</span>
+</div>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="brand">
+    <span class="crest-mini">AK</span>
+    <span>Al-Khayr EFB</span>
+  </div>
+  <nav id="topNav">
+    <a href="#home" data-page="home">Home</a>
+    <a href="#announcements" data-page="announcements">Announcements</a>
+    <a href="#rules" data-page="rules">Rules</a>
+    <a href="#fixtures" data-page="fixtures">Fixtures</a>
+    <a href="#results" data-page="results">Results</a>
+    <a href="#standings" data-page="standings">Standings</a>
+    <a href="#knockout" data-page="knockout">Knockout</a>
+    <a href="#about" data-page="about">About</a>
+    <a href="#contact" data-page="contact">Contact</a>
+  </nav>
+</header>
+
+<div class="offline-banner" id="offlineBanner">You're offline — showing the last saved data.</div>
+
+<main class="container">
+
+  <!-- ===================== HOME ===================== -->
+  <section class="page active" id="page-home">
+    <div class="hero" id="hero">
+      <span class="hero-badge">Currently Active</span>
+      <h1 id="tournamentName">Loading&hellip;</h1>
+      <div class="season mono" id="tournamentSub"></div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+
+    <div id="emptyStateWrap" style="display:none;">
+      <section class="block">
+        <div class="card empty-state">
+          <div class="glyph">⚽</div>
+          <strong>No Active Tournament</strong>
+          <p class="text-low" style="margin:0;">
+            No tournament format has been created and activated yet.<br />
+            Check back soon — the admin will start a new tournament shortly.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div id="homePreviewSections" style="display:none;">
+      <section class="block">
+        <div class="eyebrow">Latest word</div>
+        <div class="section-head"><h2>Announcement</h2><a href="#announcements" class="chip">View all</a></div>
+        <div id="homeAnnouncementPreview"></div>
+      </section>
+
+      <section class="block">
+        <div class="eyebrow">Up next</div>
+        <div class="section-head"><h2>Next Fixtures</h2><a href="#fixtures" class="chip">View all</a></div>
+        <div class="grid grid-2" id="homeNextFixtures"></div>
+      </section>
+
+      <section class="block">
+        <div class="eyebrow">Top of the table</div>
+        <div class="section-head"><h2>Standings Snapshot</h2><a href="#standings" class="chip">Full table</a></div>
+        <div id="homeStandingsSnapshot"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ===================== ANNOUNCEMENTS ===================== -->
+  <section class="page" id="page-announcements">
+    <section class="block">
+      <div class="eyebrow" id="annEyebrow">Announcement</div>
+      <h2 id="annTitle">Announcements</h2>
+      <div id="announcementFull"></div>
+    </section>
+  </section>
+
+  <!-- ===================== RULES ===================== -->
+  <section class="page" id="page-rules">
+    <section class="block">
+      <div class="eyebrow">Format regulations</div>
+      <h2 id="rulesTitle">Rules &amp; Regulations</h2>
+      <div class="card"><div class="rules-body" id="rulesBody"></div></div>
+    </section>
+  </section>
+
+  <!-- ===================== FIXTURES ===================== -->
+  <section class="page" id="page-fixtures">
+    <section class="block">
+      <div class="section-head">
+        <h2>Fixtures</h2>
+        <div class="flex gap-8" style="flex-wrap:wrap;">
+          <select id="fxPublicDaySelect" class="day-select">
+            <option value="all">All Match Days</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="fxPublicDownloadBtn">⬇ Download</button>
+        </div>
+      </div>
+      <div class="chip-row" id="fxPublicFilterChips"></div>
+      <div class="grid grid-2 mt-16" id="fxPublicList"></div>
+    </section>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section class="page" id="page-results">
+    <section class="block">
+      <div class="section-head">
+        <h2>Results</h2>
+        <div class="flex gap-8" style="flex-wrap:wrap;">
+          <select id="resPublicDaySelect" class="day-select">
+            <option value="all">All Match Days</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="resPublicDownloadBtn">⬇ Download</button>
+        </div>
+      </div>
+      <div class="chip-row" id="resPublicFilterChips"></div>
+      <div class="grid grid-2 mt-16" id="resPublicList"></div>
+    </section>
+  </section>
+
+  <!-- ===================== KNOCKOUT ===================== -->
+  <section class="page" id="page-knockout">
+    <section class="block">
+      <div class="section-head"><h2>Knockout</h2><button class="btn btn-outline btn-sm hidden" id="koPublicDownloadBtn">⬇ Download</button></div>
+      <div id="koPublicChampionBanner" style="display:none;"></div>
+      <div id="koPublicRounds" class="mt-16"></div>
+    </section>
+  </section>
+
+  <!-- ===================== STANDINGS ===================== -->
+  <section class="page" id="page-standings">
+    <section class="block">
+      <div class="section-head"><h2>Standings</h2><button class="btn btn-outline btn-sm" id="stPublicDownloadBtn">⬇ Download</button></div>
+      <div class="chip-row" id="stPublicFilterChips"></div>
+      <div id="stPublicTables" class="mt-16"></div>
+    </section>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section class="page" id="page-about">
+    <section class="block">
+      <div class="eyebrow">The project</div>
+      <h2>About Al-Khayr EFB Tournament</h2>
+      <div class="card">
+        <p>Al-Khayr EFB Tournament is a community eFootball competition platform supporting multiple tournament
+          formats — single leagues, home &amp; away leagues, and group-stage championships — all run from a single,
+          unified scoreboard.</p>
+        <p>Only one tournament is ever active at a time, but every tournament keeps its own announcements, rules,
+          fixtures, results and standings safely stored, so organisers can run tournament after tournament without
+          losing any history.</p>
+        <p style="margin:0;">Registration, fixtures, results and standings are all managed and kept accurate by the
+          Al-Khayr EFB admin team — check the Announcements page for the latest updates.</p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===================== CONTACT ===================== -->
+  <section class="page" id="page-contact">
+    <section class="block">
+      <div class="eyebrow">Get in touch</div>
+      <h2>Contact</h2>
+      <div class="card">
+        <p>For questions about registration, fixtures or results, reach the Al-Khayr EFB admin directly.</p>
+        <ul class="contact-list">
+          <li><a href="tel:08024348605">📞 &nbsp; 0802 434 8605 <span class="text-low" style="margin-left:6px;font-size:12px;">— Admin Contact</span></a></li>
+        </ul>
+      </div>
+    </section>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <button class="btn btn-primary btn-sm hidden" id="installAppBtn" style="margin-bottom:14px;">📲 Install App</button>
+    <div class="text-low hidden" id="iosInstallHint" style="font-size:12px;margin-bottom:14px;">
+      📲 Install this app: tap the Share icon in Safari, then "Add to Home Screen".
+    </div>
+    <div class="footer-row">
+      <span id="footerText">Al-Khayr EFB Tournament</span>
+      <!-- Hidden admin entry: tap this crest 5 times to open the admin login. -->
+      <span class="secret-crest" id="secretCrest" title="">⚽</span>
+    </div>
+    <div class="footer-links mt-8">
+      <a href="#announcements">Announcements</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bottom nav (mobile) -->
+<nav class="bottom-nav" id="bottomNav">
+  <a href="#home" data-page="home"><span class="icon">🏠</span>Home</a>
+  <a href="#fixtures" data-page="fixtures"><span class="icon">📅</span>Fixtures</a>
+  <a href="#results" data-page="results"><span class="icon">⚽</span>Results</a>
+  <a href="#standings" data-page="standings"><span class="icon">📊</span>Table</a>
+  <a href="#knockout" data-page="knockout"><span class="icon">🏁</span>Cup</a>
+  <a href="#rules" data-page="rules"><span class="icon">📖</span>Rules</a>
+</nav>
+
+<div id="toast-host"></div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script src="firebase.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

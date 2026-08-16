@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Admin Login — Al-Khayr EFB Tournament</title>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#090d16" />
+<link rel="icon" href="favicon.ico" sizes="any" />
+<link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="crest"></div>
+  <span>Checking session&hellip;</span>
+</div>
+
+<!-- ===================== LOGIN VIEW ===================== -->
+<div class="login-shell" id="loginView" style="display:none;">
+  <div class="card login-card">
+    <span class="crest-mini" style="display:flex;align-items:center;justify-content:center;">AK</span>
+    <h1>Admin Login</h1>
+    <div class="sub">Al-Khayr EFB Tournament Management System</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </div>
+      <div class="field-error" id="loginError"></div>
+      <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+        <span id="loginBtnText">Log In</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== ADMIN SHELL ===================== -->
+<div id="dashboardView" style="display:none;">
+  <div class="admin-shell">
+
+    <!-- Sidebar (desktop) -->
+    <aside class="admin-sidebar">
+      <div class="brand"><span class="crest-mini">AK</span><span>Al-Khayr EFB</span></div>
+      <nav class="admin-nav" id="adminNav">
+        <a href="#" data-page="dashboard" class="active">🏠 &nbsp;Dashboard</a>
+        <a href="#" data-page="teams">👥 &nbsp;Team Manager</a>
+        <a href="#" data-page="tournaments">🏆 &nbsp;Tournament Manager</a>
+        <a href="#" data-page="fixtures">📅 &nbsp;Fixtures</a>
+        <a href="#" data-page="results">⚽ &nbsp;Results</a>
+        <a href="#" data-page="standings">📊 &nbsp;Standings</a>
+        <a href="#" data-page="knockout">🏁 &nbsp;Knockout</a>
+        <a href="#" data-page="announcements">📣 &nbsp;Announcements</a>
+        <a href="#" data-page="rules">📖 &nbsp;Rules</a>
+      </nav>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <div class="brand" style="font-size:15px;">
+          <span class="crest-mini" style="width:26px;height:26px;font-size:11px;">AK</span>
+          <span id="adminPageTitle">Dashboard</span>
+        </div>
+        <div class="flex gap-8" style="align-items:center;">
+          <span class="text-low" id="adminEmail" style="font-size:12.5px;"></span>
+          <button class="btn btn-outline btn-sm" id="logoutBtn">Log Out</button>
+        </div>
+      </header>
+
+      <!-- Nav (mobile) -->
+      <nav class="admin-mobile-nav" id="adminMobileNav">
+        <button class="chip active" data-page="dashboard">🏠 Dashboard</button>
+        <button class="chip" data-page="teams">👥 Team Manager</button>
+        <button class="chip" data-page="tournaments">🏆 Tournament Manager</button>
+        <button class="chip" data-page="fixtures">📅 Fixtures</button>
+        <button class="chip" data-page="results">⚽ Results</button>
+        <button class="chip" data-page="standings">📊 Standings</button>
+        <button class="chip" data-page="knockout">🏁 Knockout</button>
+        <button class="chip" data-page="announcements">📣 Announcements</button>
+        <button class="chip" data-page="rules">📖 Rules</button>
+      </nav>
+
+      <div class="admin-content">
+
+        <!-- -------- DASHBOARD PAGE -------- -->
+        <section class="admin-page active" id="adminpage-dashboard">
+          <div class="eyebrow">Signed in</div>
+          <h2>Welcome, <span id="adminWelcomeName">admin</span> 👋</h2>
+          <div class="grid grid-3 mt-16">
+            <div class="card"><div class="text-low" style="font-size:12px;">Teams Saved</div><div class="mono" style="font-size:26px;font-weight:700;" id="statTeamCount">0</div></div>
+            <div class="card"><div class="text-low" style="font-size:12px;">Active Tournament</div><div style="font-size:16px;font-weight:700;margin-top:4px;" id="statActiveTournament">None yet</div></div>
+            <div class="card"><div class="text-low" style="font-size:12px;">Current Phase</div><div style="font-size:16px;font-weight:700;margin-top:4px;">Phase 9 ✅</div></div>
+            <div class="card"><div class="text-low" style="font-size:12px;">Champion</div><div style="font-size:16px;font-weight:700;margin-top:4px;color:var(--gold-400);" id="statChampion">None yet</div></div>
+          </div>
+          <div class="card mt-16">
+            <p style="margin:0;">Team Manager, Tournament Manager, Fixtures, Results, Standings, and Announcements &amp; Rules are all live. Settings and the full public site arrive in the phases ahead.</p>
+          </div>
+        </section>
+
+        <!-- -------- TEAM MANAGER PAGE -------- -->
+        <section class="admin-page" id="adminpage-teams">
+          <div class="flex-between">
+            <div>
+              <div class="eyebrow">Permanent club database</div>
+              <h2 class="mb-0">Team Manager</h2>
+            </div>
+            <div class="flex gap-8">
+              <button class="btn btn-outline btn-sm" id="seedClubsBtn">⚡ Load Starter Clubs</button>
+              <button class="btn btn-primary btn-sm" id="addTeamBtn">+ Add Team</button>
+            </div>
+          </div>
+
+          <!-- Add/Edit form (hidden until Add or Edit is clicked) -->
+          <div class="card mt-16 hidden" id="teamFormCard">
+            <h3 id="teamFormTitle" style="font-size:16px;">Add Team</h3>
+            <form id="teamForm">
+              <input type="hidden" id="teamId" />
+              <div class="field-row">
+                <div class="field">
+                  <label for="teamName">Team Name</label>
+                  <input type="text" id="teamName" placeholder="e.g. Real Madrid" required />
+                </div>
+                <div class="field">
+                  <label for="teamShort">Short Name</label>
+                  <input type="text" id="teamShort" placeholder="e.g. RMA" maxlength="6" required />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="teamLogo">Logo Filename</label>
+                  <input type="text" id="teamLogo" placeholder="e.g. real-madrid.png" />
+                </div>
+                <div class="field">
+                  <label>Preview</label>
+                  <div class="flex" style="align-items:center;gap:10px;height:44px;">
+                    <img id="teamLogoPreview" src="assets/icons/team-placeholder.svg" alt=""
+                         style="width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--ink-700);" />
+                    <span class="text-low" style="font-size:12px;">assets/logos/{filename}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="field-error" id="teamFormError"></div>
+              <div class="flex gap-8">
+                <button type="submit" class="btn btn-primary" id="teamSaveBtn">Save Team</button>
+                <button type="button" class="btn btn-outline" id="teamCancelBtn">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="field mt-16" style="max-width:320px;">
+            <input type="text" id="teamSearch" placeholder="🔍 Search teams by name or short name…" />
+          </div>
+
+          <div class="text-low mt-8" style="font-size:12.5px;" id="teamCountLabel">0 teams saved</div>
+
+          <div class="table-wrap mt-8" id="teamsTableWrap">
+            <table class="admin-table" id="teamsTable">
+              <thead>
+                <tr><th></th><th>Team Name</th><th>Short</th><th>Logo File</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="teamsTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state hidden" id="teamsEmptyState">
+            <div class="glyph">👥</div>
+            <strong>No teams yet</strong>
+            <p class="text-low" style="margin:0;">Click "Add Team" or "Load Starter Clubs" to get going.</p>
+          </div>
+        </section>
+
+        <!-- -------- TOURNAMENT MANAGER PAGE -------- -->
+        <section class="admin-page" id="adminpage-tournaments">
+          <div class="eyebrow">Create & manage</div>
+          <h2>Tournament Manager</h2>
+
+          <!-- ---- Create tournament ---- -->
+          <div class="card mt-16">
+            <h3 style="font-size:16px;">Create Tournament</h3>
+
+            <div class="text-low" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px;">Step 1 — Choose Format</div>
+            <div class="grid grid-2" id="formatOptions"></div>
+
+            <div class="text-low" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin:20px 0 8px;">Step 2 — Tournament Details</div>
+            <div class="field">
+              <label for="tName">Tournament Name</label>
+              <input type="text" id="tName" value="Al-Khayr EFB Tournament" required />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="tPrize">Prize Information</label>
+                <input type="text" id="tPrize" placeholder="e.g. ₦100,000 + Trophy" />
+              </div>
+              <div class="field"></div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="tStart">Start Date</label>
+                <input type="date" id="tStart" />
+              </div>
+              <div class="field">
+                <label for="tEnd">End Date</label>
+                <input type="date" id="tEnd" />
+              </div>
+            </div>
+
+            <div class="flex-between" style="margin:20px 0 8px;">
+              <div class="text-low" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Step 3 — Select Teams</div>
+              <div class="mono" style="font-size:13px;" id="teamSelectCount">0 / 0 selected</div>
+            </div>
+            <input type="text" id="tTeamSearch" placeholder="🔍 Filter teams…" style="width:100%;padding:11px 12px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);margin-bottom:10px;" />
+            <div class="table-wrap" style="max-height:340px;overflow-y:auto;">
+              <table class="admin-table" id="teamSelectTable">
+                <thead><tr><th style="width:40px;"></th><th></th><th>Team</th><th>Short</th></tr></thead>
+                <tbody id="teamSelectBody"></tbody>
+              </table>
+            </div>
+            <div class="empty-state hidden" id="teamSelectEmpty">
+              <div class="glyph">👥</div>
+              <strong>No teams saved yet</strong>
+              <p class="text-low" style="margin:0;">Add teams in Team Manager first.</p>
+            </div>
+
+            <div class="field-error" id="tFormError"></div>
+            <button class="btn btn-primary btn-block mt-16" id="createTournamentBtn" disabled>Create Tournament</button>
+          </div>
+
+          <!-- ---- Existing tournaments ---- -->
+          <div class="flex-between mt-16">
+            <h3 style="font-size:16px;margin:0;">All Tournaments</h3>
+          </div>
+          <div class="grid mt-8" id="tournamentsList"></div>
+          <div class="empty-state hidden" id="tournamentsEmpty">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one above to get started.</p>
+          </div>
+        </section>
+
+        <!-- -------- FIXTURES PAGE -------- -->
+        <section class="admin-page" id="adminpage-fixtures">
+          <div class="eyebrow">Fixture generator</div>
+          <h2>Fixtures</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="fxTournamentSelect">Tournament</label>
+            <select id="fxTournamentSelect"></select>
+          </div>
+
+          <div id="fxNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="fxContent" class="hidden">
+            <div class="card mt-16">
+              <div class="flex-between">
+                <div>
+                  <div class="fmt-title" style="font-weight:700;" id="fxFormatLabel">—</div>
+                  <div class="text-low" style="font-size:12.5px;margin-top:4px;" id="fxSummary">—</div>
+                </div>
+                <div class="flex gap-8" style="flex-wrap:wrap;">
+                  <select id="fxDownloadMatchdaySelect" style="padding:9px 10px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-size:12.5px;">
+                    <option value="all">All Matchdays</option>
+                  </select>
+                  <select id="fxDownloadDaySelect" style="padding:9px 10px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-size:12.5px;">
+                    <option value="all">All Match Days</option>
+                  </select>
+                  <button class="btn btn-outline" id="fxDownloadBtn">⬇ Download</button>
+                  <button class="btn btn-primary" id="fxGenerateBtn">Generate Fixtures</button>
+                </div>
+              </div>
+              <div class="field-error" id="fxError"></div>
+            </div>
+
+            <div id="fxGroupsWrap" class="grid grid-2 mt-16 hidden"></div>
+
+            <div class="flex-between mt-16">
+              <h3 style="font-size:16px;margin:0;">Fixture List</h3>
+            </div>
+            <div class="chip-row mt-8" id="fxFilterChips" style="display:flex;gap:8px;overflow-x:auto;"></div>
+            <div class="grid grid-2 mt-16" id="fxList"></div>
+            <div class="empty-state hidden" id="fxEmptyState">
+              <div class="glyph">📅</div>
+              <strong>No fixtures generated yet</strong>
+              <p class="text-low" style="margin:0;">Click "Generate Fixtures" above.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- -------- RESULTS PAGE -------- -->
+        <section class="admin-page" id="adminpage-results">
+          <div class="eyebrow">Match results</div>
+          <h2>Results</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="resTournamentSelect">Tournament</label>
+            <select id="resTournamentSelect"></select>
+          </div>
+
+          <div id="resNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="resContent" class="hidden">
+            <!-- Score entry form (hidden until a fixture is clicked) -->
+            <div class="card mt-16 hidden" id="resFormCard">
+              <h3 style="font-size:16px;" id="resFormTitle">Enter Result</h3>
+              <div class="flex-between" style="align-items:center;margin-bottom:12px;">
+                <div style="font-weight:700;font-size:15px;" id="resFormTeams">Home vs Away</div>
+              </div>
+              <form id="resForm">
+                <input type="hidden" id="resFixtureId" />
+                <div class="field-row">
+                  <div class="field">
+                    <label for="resHomeGoals">Home Goals</label>
+                    <input type="number" id="resHomeGoals" min="0" required />
+                  </div>
+                  <div class="field">
+                    <label for="resAwayGoals">Away Goals</label>
+                    <input type="number" id="resAwayGoals" min="0" required />
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="resDate">Date</label>
+                    <input type="date" id="resDate" />
+                  </div>
+                  <div class="field">
+                    <label for="resTime">Time</label>
+                    <input type="time" id="resTime" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="resVenue">Venue</label>
+                  <input type="text" id="resVenue" placeholder="e.g. Al-Khayr Arena" />
+                </div>
+                <div class="field-error" id="resFormError"></div>
+                <div class="flex gap-8">
+                  <button type="submit" class="btn btn-primary" id="resSaveBtn">Save Result</button>
+                  <button type="button" class="btn btn-outline" id="resCancelBtn">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="flex-between mt-16">
+              <div class="chip-row" id="resFilterChips" style="display:flex;gap:8px;overflow-x:auto;">
+                <button class="chip active" data-res-filter="all">All</button>
+                <button class="chip" data-res-filter="upcoming">Upcoming</button>
+                <button class="chip" data-res-filter="played">Played</button>
+              </div>
+              <div class="flex gap-8" style="flex-wrap:wrap;">
+                <select id="resDownloadMatchdaySelect" style="padding:9px 10px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-size:12.5px;">
+                  <option value="all">All Matchdays</option>
+                </select>
+                <select id="resDownloadDaySelect" style="padding:9px 10px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-size:12.5px;">
+                  <option value="all">All Match Days</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="resDownloadBtn">⬇ Download Results</button>
+              </div>
+            </div>
+
+            <div class="grid grid-2 mt-16" id="resList"></div>
+            <div class="empty-state hidden" id="resEmptyState">
+              <div class="glyph">📅</div>
+              <strong>No fixtures yet</strong>
+              <p class="text-low" style="margin:0;">Generate fixtures for this tournament first.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- -------- STANDINGS PAGE -------- -->
+        <section class="admin-page" id="adminpage-standings">
+          <div class="eyebrow">League &amp; group tables</div>
+          <h2>Standings</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="stTournamentSelect">Tournament</label>
+            <select id="stTournamentSelect"></select>
+          </div>
+
+          <div id="stNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="stContent" class="hidden">
+            <div class="flex-between mt-16">
+              <div class="chip-row" id="stGroupChips" style="display:flex;gap:8px;overflow-x:auto;"></div>
+              <button class="btn btn-outline btn-sm" id="stDownloadBtn">⬇ Download Standings</button>
+            </div>
+            <div class="mt-16" id="stTables"></div>
+          </div>
+        </section>
+
+        <!-- -------- KNOCKOUT PAGE -------- -->
+        <section class="admin-page" id="adminpage-knockout">
+          <div class="eyebrow">Bracket, seeded automatically</div>
+          <h2>Knockout</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="koTournamentSelect">Tournament</label>
+            <select id="koTournamentSelect"></select>
+          </div>
+
+          <div id="koNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="koContent" class="hidden">
+            <div class="card mt-16" id="koChampionBanner" style="display:none;"></div>
+
+            <!-- Not generated yet -->
+            <div class="card mt-16" id="koNotGenerated">
+              <div class="fmt-title" style="font-weight:700;">Knockout stage not started yet</div>
+              <p class="text-low" style="margin:8px 0 14px;font-size:13px;" id="koNotGeneratedNote">
+                The bracket is seeded automatically the moment every league/group fixture for this
+                tournament is marked played — nothing to do here until then.
+              </p>
+              <button class="btn btn-primary btn-sm" id="koGenerateBtn" disabled>Generate Knockout Stage Now</button>
+            </div>
+
+            <!-- Score entry form -->
+            <div class="card mt-16 hidden" id="koFormCard">
+              <h3 style="font-size:16px;" id="koFormTitle">Enter Result</h3>
+              <div class="flex-between" style="align-items:center;margin-bottom:12px;">
+                <div style="font-weight:700;font-size:15px;" id="koFormTeams">Home vs Away</div>
+              </div>
+              <form id="koForm">
+                <input type="hidden" id="koRoundIndex" />
+                <input type="hidden" id="koMatchId" />
+                <div class="field-row">
+                  <div class="field">
+                    <label for="koHomeGoals">Home Goals</label>
+                    <input type="number" id="koHomeGoals" min="0" required />
+                  </div>
+                  <div class="field">
+                    <label for="koAwayGoals">Away Goals</label>
+                    <input type="number" id="koAwayGoals" min="0" required />
+                  </div>
+                </div>
+
+                <label class="flex" style="align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer;">
+                  <input type="checkbox" id="koWentToEt" style="width:auto;" />
+                  Match went to extra time / penalties
+                </label>
+
+                <div id="koEtPensFields" class="hidden">
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="koEtHomeGoals">Extra Time — Home Goals</label>
+                      <input type="number" id="koEtHomeGoals" min="0" />
+                    </div>
+                    <div class="field">
+                      <label for="koEtAwayGoals">Extra Time — Away Goals</label>
+                      <input type="number" id="koEtAwayGoals" min="0" />
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label for="koHomePens">Penalties — Home</label>
+                      <input type="number" id="koHomePens" min="0" />
+                    </div>
+                    <div class="field">
+                      <label for="koAwayPens">Penalties — Away</label>
+                      <input type="number" id="koAwayPens" min="0" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="koDate">Date</label>
+                    <input type="date" id="koDate" />
+                  </div>
+                  <div class="field">
+                    <label for="koTime">Time</label>
+                    <input type="time" id="koTime" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="koVenue">Venue</label>
+                  <input type="text" id="koVenue" placeholder="e.g. Al-Khayr Arena" />
+                </div>
+                <div class="field-error" id="koFormError"></div>
+                <div class="flex gap-8">
+                  <button type="submit" class="btn btn-primary" id="koSaveBtn">Save Result</button>
+                  <button type="button" class="btn btn-outline" id="koCancelBtn">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="flex-between mt-16">
+              <h3 style="font-size:16px;margin:0;">Bracket</h3>
+              <div class="flex gap-8">
+                <button class="btn btn-outline btn-sm hidden" id="koRegenerateBtn">Regenerate Bracket</button>
+                <button class="btn btn-outline btn-sm hidden" id="koDownloadBtn">⬇ Download Bracket</button>
+              </div>
+            </div>
+            <div id="koRounds" class="mt-16"></div>
+          </div>
+        </section>
+
+        <!-- -------- ANNOUNCEMENTS PAGE -------- -->
+        <section class="admin-page" id="adminpage-announcements">
+          <div class="eyebrow">Per-tournament copy</div>
+          <h2>Announcements</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="annTournamentSelect">Tournament</label>
+            <select id="annTournamentSelect"></select>
+          </div>
+
+          <div id="annNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="annContent" class="hidden mt-16">
+            <div class="grid grid-2">
+              <div class="card">
+                <div class="flex-between" style="margin-bottom:10px;">
+                  <h3 style="font-size:15px;margin:0;">Edit</h3>
+                  <span class="mono" id="annStatus" style="font-size:11.5px;color:var(--win);">Saved</span>
+                </div>
+                <textarea id="annTextarea" rows="14" style="width:100%;padding:12px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-family:var(--font-body);font-size:13.5px;resize:vertical;"></textarea>
+                <div class="flex gap-8 mt-16">
+                  <button class="btn btn-primary" id="annSaveBtn" disabled>Save Announcement</button>
+                  <button type="button" class="btn btn-outline" id="annResetBtn">Reset to Standard Copy</button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 style="font-size:15px;margin:0 0 10px;">Public Preview</h3>
+                <div class="content-preview" id="annPreview"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- -------- RULES PAGE -------- -->
+        <section class="admin-page" id="adminpage-rules">
+          <div class="eyebrow">Per-tournament copy</div>
+          <h2>Rules & Regulations</h2>
+
+          <div class="field mt-16" style="max-width:420px;">
+            <label for="rulesTournamentSelect">Tournament</label>
+            <select id="rulesTournamentSelect"></select>
+          </div>
+
+          <div id="rulesNoTournament" class="empty-state hidden">
+            <div class="glyph">🏆</div>
+            <strong>No tournaments yet</strong>
+            <p class="text-low" style="margin:0;">Create one in Tournament Manager first.</p>
+          </div>
+
+          <div id="rulesContent" class="hidden mt-16">
+            <div class="grid grid-2">
+              <div class="card">
+                <div class="flex-between" style="margin-bottom:10px;">
+                  <h3 style="font-size:15px;margin:0;">Edit</h3>
+                  <span class="mono" id="rulesStatus" style="font-size:11.5px;color:var(--win);">Saved</span>
+                </div>
+                <textarea id="rulesTextarea" rows="14" style="width:100%;padding:12px;border-radius:9px;background:rgba(27,39,64,0.7);border:1px solid var(--ink-600);color:var(--text-hi);font-family:var(--font-body);font-size:13.5px;resize:vertical;"></textarea>
+                <div class="flex gap-8 mt-16">
+                  <button class="btn btn-primary" id="rulesSaveBtn" disabled>Save Rules</button>
+                  <button type="button" class="btn btn-outline" id="rulesResetBtn">Reset to Standard Copy</button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 style="font-size:15px;margin:0 0 10px;">Public Preview</h3>
+                <div class="content-preview" id="rulesPreview"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-host"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script src="firebase.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
