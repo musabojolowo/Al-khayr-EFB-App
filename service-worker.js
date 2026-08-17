@@ -32,9 +32,9 @@ const APP_SHELL_FILES = [
   "./firebase.js",
   "./script.js",
   "./admin.js",
-  "./assets/icons/logo-192.png",
-"./assets/icons/logo-512.png",
-"./favicon.ico"
+  "./assets/logos/logo-192.png",
+  "./assets/logos/logo-512.png",
+  "./favicon.ico"
 ];
 
 // Any request whose URL contains one of these is realtime data — never cache.

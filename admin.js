@@ -185,7 +185,7 @@ function slugify(str) {
 }
 
 function teamRowLogoSrc(logo) {
-  return logo ? `assets/logos/${logo}` : "assets/icons/logo-192.png";
+  return logo ? `assets/logos/${logo}` : "assets/logos/logo-192.png";
 }
 
 /* ---------------------------------------------------------------------
@@ -219,7 +219,7 @@ function renderTeamsTable() {
 
   body.innerHTML = rows.map((t) => `
     <tr>
-      <td><img src="${teamRowLogoSrc(t.logo)}" onerror="this.src='assets/icons/logo-192.png'"
+      <td><img src="${teamRowLogoSrc(t.logo)}" onerror="this.src='assets/logos/logo-192.png'"
                alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--ink-700);" /></td>
       <td>${escapeAdminHTML(t.name)}</td>
       <td class="mono">${escapeAdminHTML(t.shortName || "—")}</td>
@@ -472,7 +472,7 @@ function renderTeamSelectList() {
   body.innerHTML = rows.map((t) => `
     <tr>
       <td><input type="checkbox" data-team-select="${t.id}" ${tournamentAdminState.selectedTeamIds.has(t.id) ? "checked" : ""} /></td>
-      <td><img src="${teamRowLogoSrc(t.logo)}" onerror="this.src='assets/icons/logo-192.png'" alt=""
+      <td><img src="${teamRowLogoSrc(t.logo)}" onerror="this.src='assets/logos/logo-192.png'" alt=""
                style="width:24px;height:24px;border-radius:50%;object-fit:cover;background:var(--ink-700);" /></td>
       <td>${escapeAdminHTML(t.name)}</td>
       <td class="mono">${escapeAdminHTML(t.shortName || "—")}</td>
@@ -928,7 +928,7 @@ function renderFxGroups() {
       <div class="eyebrow" style="margin-bottom:10px;">Group ${letter}</div>
       ${t.groups[letter].map((teamId) => `
         <div class="flex" style="align-items:center;gap:8px;padding:5px 0;font-size:13.5px;">
-          <img src="${teamRowLogoSrc((fixtureAdminState.teams[teamId] || {}).logo)}" onerror="this.src='assets/icons/logo-192.png'"
+          <img src="${teamRowLogoSrc((fixtureAdminState.teams[teamId] || {}).logo)}" onerror="this.src='assets/logos/logo-192.png'"
                style="width:22px;height:22px;border-radius:50%;object-fit:cover;background:var(--ink-700);" alt="" />
           ${escapeAdminHTML((fixtureAdminState.teams[teamId] || {}).name || "Unknown team")}
         </div>

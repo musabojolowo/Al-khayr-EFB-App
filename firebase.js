@@ -132,7 +132,7 @@ const Paths = {
 // Resolves a stored logo filename to its on-disk path. Falls back to a
 // generic placeholder crest if the team has no logo set yet.
 function logoPath(filename) {
-  return filename ? `assets/logos/${filename}` : "assets/icons/logo-192.png";
+  return filename ? `assets/logos/${filename}` : "assets/logos/logo-192.png";
 }
 
 
