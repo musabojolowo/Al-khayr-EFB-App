@@ -16,7 +16,7 @@
      its own "offline" banner rather than the browser's default error page.
    ========================================================================= */
 
-const CACHE_VERSION = "alkhayr-efb-v1";
+const CACHE_VERSION = "alkhayr-efb-v2";
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `runtime-${CACHE_VERSION}`;
 
@@ -32,14 +32,9 @@ const APP_SHELL_FILES = [
   "./firebase.js",
   "./script.js",
   "./admin.js",
-  "./assets/icons/icon-192.png",
-  "./assets/icons/icon-512.png",
-  "./assets/icons/icon-maskable-192.png",
-  "./assets/icons/icon-maskable-512.png",
-  "./assets/icons/apple-touch-icon.png",
-  "./favicon.ico",
-  "./assets/icons/favicon-32.png",
-  "./assets/icons/team-placeholder.svg"
+  "./assets/icons/logo-192.png",
+"./assets/icons/logo-512.png",
+"./favicon.ico"
 ];
 
 // Any request whose URL contains one of these is realtime data — never cache.
