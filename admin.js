@@ -756,8 +756,14 @@ const fixtureAdminState = {
   selectedTournamentId: null,
   fixtures: {},          // fixtures of the currently selected tournament
   fixturesRef: null,     // live Firebase ref, detached when switching tournaments
-  filter: "all"
+  filter: "all",
+  matchdayFilter: "all"
 };
+
+function adminFixtureMatchday(fixture) {
+  const value = fixture.matchday === null || fixture.matchday === undefined ? fixture.round : fixture.matchday;
+  return value === null || value === undefined ? "" : String(value);
+}
 
 /* ---------------------------------------------------------------------
    Tournament selector
@@ -798,6 +804,7 @@ function selectTournamentForFixtures(tournamentId) {
   fixtureAdminState.fixturesRef.on("value", (snap) => {
     fixtureAdminState.fixtures = snap.val() || {};
     fixtureAdminState.filter = "all";
+    fixtureAdminState.matchdayFilter = "all";
     renderFxSummary();
     renderFxGroups();
     renderFxFilters();
@@ -820,23 +827,15 @@ function renderFxDaySelect() {
   const t = fixtureAdminState.tournaments[fixtureAdminState.selectedTournamentId];
   const def = t ? TOURNAMENT_FORMATS[t.format] : null;
 
-  // League formats download by Matchday (round number — permanent on
-  // every fixture, unaffected by whether a calendar date is set).
-  // Group formats keep the original per-date picker, untouched.
-  if (def && def.type === "league") {
-    mdSelect.classList.remove("hidden");
-    select.classList.add("hidden");
-    const total = matchdayCountForFormat(def);
-    let options = `<option value="all">All Matchdays</option>`;
-    for (let m = 1; m <= total; m++) options += `<option value="${m}">Matchday ${m}</option>`;
-    mdSelect.innerHTML = options;
-  } else {
-    mdSelect.classList.add("hidden");
-    select.classList.remove("hidden");
-    const days = matchDaysFromFixtures(Object.values(fixtureAdminState.fixtures));
-    select.innerHTML = `<option value="all">All Match Days</option>` +
-      days.map((d) => `<option value="${d}">${formatMatchDayLabel(d)}</option>`).join("");
-  }
+  const matchdays = [...new Set(Object.values(fixtureAdminState.fixtures)
+    .map(adminFixtureMatchday)
+    .filter(Boolean))].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+  const selected = mdSelect.value;
+  mdSelect.classList.remove("hidden");
+  mdSelect.innerHTML = `<option value="all">All Matchdays</option>` +
+    matchdays.map((d) => `<option value="${escapeAdminHTML(d)}">Matchday ${escapeAdminHTML(d)}</option>`).join("");
+  mdSelect.value = matchdays.includes(selected) ? selected : "all";
+  fixtureAdminState.matchdayFilter = mdSelect.value;
 }
 
 /* ---------------------------------------------------------------------
@@ -990,6 +989,7 @@ function renderFxList() {
   if (fixtureAdminState.filter !== "all") {
     rows = rows.filter((f) => (def.type === "groups" ? f.group === fixtureAdminState.filter : String(f.leg) === fixtureAdminState.filter));
   }
+  if (fixtureAdminState.matchdayFilter !== "all") rows = rows.filter((f) => adminFixtureMatchday(f) === fixtureAdminState.matchdayFilter);
   rows.sort((a, b) => (a.group || "").localeCompare(b.group || "") || a.round - b.round);
 
   list.innerHTML = rows.map((f) => `
@@ -1031,6 +1031,10 @@ function initFixtureManager() {
   $("#fxTournamentSelect").addEventListener("change", (e) => selectTournamentForFixtures(e.target.value));
   $("#fxGenerateBtn").addEventListener("click", generateFixturesForSelectedTournament);
   $("#fxDownloadBtn").addEventListener("click", downloadFixturesExport);
+  $("#fxDownloadMatchdaySelect").addEventListener("change", (e) => {
+    fixtureAdminState.matchdayFilter = e.target.value;
+    renderFxList();
+  });
 }
 
 /* ---------------------------------------------------------------------
@@ -1044,9 +1048,8 @@ function downloadFixturesExport() {
   let rows = Object.values(fixtureAdminState.fixtures);
 
   if (def.type === "league") {
-    // Matchday (round-number) download for the two league formats.
     const matchday = $("#fxDownloadMatchdaySelect") ? $("#fxDownloadMatchdaySelect").value : "all";
-    if (matchday !== "all") rows = rows.filter((f) => f.round === parseInt(matchday, 10));
+    if (matchday !== "all") rows = rows.filter((f) => adminFixtureMatchday(f) === matchday);
 
     if (!rows.length) {
       showToast(matchday === "all" ? "Generate fixtures before downloading." : "No fixtures found for that Matchday.", "error");
@@ -1106,7 +1109,8 @@ const resultsAdminState = {
   selectedTournamentId: null,
   fixtures: {},
   fixturesRef: null,
-  filter: "all"
+  filter: "all",
+  matchdayFilter: "all"
 };
 
 function resTeamName(id) { return (resultsAdminState.teams[id] || {}).name || "TBD"; }
@@ -1148,6 +1152,7 @@ function selectTournamentForResults(tournamentId) {
   resultsAdminState.fixturesRef = db.ref(Paths.fixtures(tournamentId));
   resultsAdminState.fixturesRef.on("value", (snap) => {
     resultsAdminState.fixtures = snap.val() || {};
+    resultsAdminState.matchdayFilter = "all";
     renderResList();
     renderResDaySelect();
   });
@@ -1161,20 +1166,15 @@ function renderResDaySelect() {
   const t = resultsAdminState.tournaments[resultsAdminState.selectedTournamentId];
   const def = t ? TOURNAMENT_FORMATS[t.format] : null;
 
-  if (def && def.type === "league") {
-    mdSelect.classList.remove("hidden");
-    select.classList.add("hidden");
-    const total = matchdayCountForFormat(def);
-    let options = `<option value="all">All Matchdays</option>`;
-    for (let m = 1; m <= total; m++) options += `<option value="${m}">Matchday ${m}</option>`;
-    mdSelect.innerHTML = options;
-  } else {
-    mdSelect.classList.add("hidden");
-    select.classList.remove("hidden");
-    const days = matchDaysFromFixtures(Object.values(resultsAdminState.fixtures).filter((f) => f.played));
-    select.innerHTML = `<option value="all">All Match Days</option>` +
-      days.map((d) => `<option value="${d}">${formatMatchDayLabel(d)}</option>`).join("");
-  }
+  const matchdays = [...new Set(Object.values(resultsAdminState.fixtures)
+    .map(adminFixtureMatchday)
+    .filter(Boolean))].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+  const selected = mdSelect.value;
+  mdSelect.classList.remove("hidden");
+  mdSelect.innerHTML = `<option value="all">All Matchdays</option>` +
+    matchdays.map((d) => `<option value="${escapeAdminHTML(d)}">Matchday ${escapeAdminHTML(d)}</option>`).join("");
+  mdSelect.value = matchdays.includes(selected) ? selected : "all";
+  resultsAdminState.matchdayFilter = mdSelect.value;
 }
 
 /* ---------------------------------------------------------------------
@@ -1190,6 +1190,7 @@ function renderResList() {
   if (!rows.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden");
 
+  if (resultsAdminState.matchdayFilter !== "all") rows = rows.filter((f) => adminFixtureMatchday(f) === resultsAdminState.matchdayFilter);
   if (resultsAdminState.filter === "upcoming") rows = rows.filter((f) => !f.played);
   if (resultsAdminState.filter === "played") rows = rows.filter((f) => f.played);
   rows.sort((a, b) => (a.group || "").localeCompare(b.group || "") || a.round - b.round);
@@ -1294,9 +1295,8 @@ function downloadResultsExport() {
   let played = Object.values(resultsAdminState.fixtures).filter((f) => f.played);
 
   if (def.type === "league") {
-    // Matchday (round-number) results download for the two league formats.
     const matchday = $("#resDownloadMatchdaySelect") ? $("#resDownloadMatchdaySelect").value : "all";
-    if (matchday !== "all") played = played.filter((f) => f.round === parseInt(matchday, 10));
+    if (matchday !== "all") played = played.filter((f) => adminFixtureMatchday(f) === matchday);
 
     if (!played.length) {
       showToast(matchday === "all" ? "No results recorded yet for this tournament." : "No completed results for that Matchday yet.", "error");
@@ -1351,6 +1351,10 @@ function initResultsManager() {
   $("#resForm").addEventListener("submit", saveResultFromForm);
   $("#resCancelBtn").addEventListener("click", closeResultForm);
   $("#resDownloadBtn").addEventListener("click", downloadResultsExport);
+  $("#resDownloadMatchdaySelect").addEventListener("change", (e) => {
+    resultsAdminState.matchdayFilter = e.target.value;
+    renderResList();
+  });
 
   $$("#resFilterChips [data-res-filter]").forEach((btn) => {
     btn.addEventListener("click", () => {

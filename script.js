@@ -16,7 +16,7 @@ const publicState = {
   fixtures: {},          // fixtures of the CURRENT tournament only
   knockout: null,        // knockout bracket of the CURRENT tournament, or null
   page: "home",
-  filters: { fixtures: "all", results: "all", standings: "all" }
+  filters: { fixtures: "all", results: "all", standings: "all", matchdays: { fixtures: "all", results: "all" } }
 };
 
 let tournamentRefs = []; // live refs on the current tournament, detached on switch
@@ -154,16 +154,44 @@ function attachTournamentListeners(id) {
 }
 
 /* ---------------------------------------------------------------------
-   Match Day pickers — narrow the Fixtures/Results downloads to a single
-   date, mirroring the same picker in the admin panel.
+   Matchday pickers — read the existing fixture property and only affect
+   what is rendered or exported. No fixture data is changed here.
    --------------------------------------------------------------------- */
+function fixtureMatchday(fixture) {
+  const value = fixture.matchday === null || fixture.matchday === undefined ? fixture.round : fixture.matchday;
+  return value === null || value === undefined ? "" : String(value);
+}
+
+function matchdaysFromFixtureData(fixtures) {
+  return [...new Set(fixtures.map(fixtureMatchday).filter(Boolean))]
+    .sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+}
+
 function renderDaySelects() {
-  const days = matchDaysFromFixtures(fixturesArray());
-  const options = `<option value="all">All Match Days</option>` + days.map((d) => `<option value="${d}">${formatMatchDayLabel(d)}</option>`).join("");
+  const matchdays = matchdaysFromFixtureData(fixturesArray());
+  const options = `<option value="all">All Matchdays</option>` + matchdays.map((d) => `<option value="${escapeHTML(d)}">Matchday ${escapeHTML(d)}</option>`).join("");
   const fxSelect = $("#fxPublicDaySelect");
   const resSelect = $("#resPublicDaySelect");
-  if (fxSelect) fxSelect.innerHTML = options;
-  if (resSelect) resSelect.innerHTML = options;
+  [fxSelect, resSelect].forEach((select) => {
+    if (!select) return;
+    const selected = select.value;
+    select.innerHTML = options;
+    select.value = matchdays.includes(selected) ? selected : "all";
+    publicState.filters.matchdays[select === fxSelect ? "fixtures" : "results"] = select.value;
+  });
+}
+
+function initPublicMatchdayFilters() {
+  const fxSelect = $("#fxPublicDaySelect");
+  const resSelect = $("#resPublicDaySelect");
+  if (fxSelect) fxSelect.addEventListener("change", (e) => {
+    publicState.filters.matchdays.fixtures = e.target.value;
+    renderFixturesPage();
+  });
+  if (resSelect) resSelect.addEventListener("change", (e) => {
+    publicState.filters.matchdays.results = e.target.value;
+    renderResultsPage();
+  });
 }
 
 function renderChrome() {
@@ -348,6 +376,7 @@ function renderFixturesPage() {
   }
   const def = formatDef();
   const all = fixturesArray().filter((f) => !f.played);
+  const matchday = publicState.filters.matchdays.fixtures;
 
   if (def.type === "groups") {
     renderFilterChips("fxPublicFilterChips", groupKeysUsed(), publicState.filters.fixtures, (val) => {
@@ -364,6 +393,7 @@ function renderFixturesPage() {
   }
 
   let list = all;
+  if (matchday !== "all") list = list.filter((f) => fixtureMatchday(f) === matchday);
   if (publicState.filters.fixtures !== "all") {
     list = def.type === "groups"
       ? all.filter((f) => f.group === publicState.filters.fixtures)
@@ -381,6 +411,7 @@ function renderResultsPage() {
   }
   const def = formatDef();
   const all = fixturesArray().filter((f) => f.played);
+  const matchday = publicState.filters.matchdays.results;
 
   if (def.type === "groups") {
     renderFilterChips("resPublicFilterChips", groupKeysUsed(), publicState.filters.results, (val) => {
@@ -397,6 +428,7 @@ function renderResultsPage() {
   }
 
   let list = all;
+  if (matchday !== "all") list = list.filter((f) => fixtureMatchday(f) === matchday);
   if (publicState.filters.results !== "all") {
     list = def.type === "groups"
       ? all.filter((f) => f.group === publicState.filters.results)
@@ -515,13 +547,13 @@ function initDownloadButtons() {
     const def = formatDef();
     const day = $("#fxPublicDaySelect") ? $("#fxPublicDaySelect").value : "all";
     let all = fixturesArray().filter((f) => !f.played);
-    if (day !== "all") all = all.filter((f) => f.date === day);
-    if (!all.length) { showToast(day === "all" ? "No upcoming fixtures to download." : "No fixtures scheduled for that match day.", "error"); return; }
-    const titleSuffix = day !== "all" ? ` — ${formatMatchDayLabel(day)}` : "";
+    if (day !== "all") all = all.filter((f) => fixtureMatchday(f) === day);
+    if (!all.length) { showToast(day === "all" ? "No upcoming fixtures to download." : "No fixtures scheduled for that matchday.", "error"); return; }
+    const titleSuffix = day !== "all" ? ` — Matchday ${day}` : "";
     const blocks = def.type === "groups"
       ? groupKeysUsed().map((g) => exportFixturesTableBlock(`Group ${g}${titleSuffix}`, all.filter((f) => f.group === g).sort((a, b) => a.round - b.round), teamName)).join("")
       : exportFixturesTableBlock(`Upcoming Fixtures${titleSuffix}`, all.sort(sortByDateTime), teamName);
-    openExportDocument({ docTitle: day !== "all" ? `Fixtures — ${formatMatchDayLabel(day)}` : "Fixtures", tournamentName: t.name, formatLabel: def.label, generatedNote: `${all.length} fixtures`, tableBlocksHTML: blocks });
+    openExportDocument({ docTitle: day !== "all" ? `Fixtures — Matchday ${day}` : "Fixtures", tournamentName: t.name, formatLabel: def.label, generatedNote: `${all.length} fixtures`, tableBlocksHTML: blocks });
   });
 
   $("#resPublicDownloadBtn").addEventListener("click", () => {
@@ -530,13 +562,13 @@ function initDownloadButtons() {
     const def = formatDef();
     const day = $("#resPublicDaySelect") ? $("#resPublicDaySelect").value : "all";
     let played = fixturesArray().filter((f) => f.played);
-    if (day !== "all") played = played.filter((f) => f.date === day);
-    if (!played.length) { showToast(day === "all" ? "No results to download yet." : "No results for that match day.", "error"); return; }
-    const titleSuffix = day !== "all" ? ` — ${formatMatchDayLabel(day)}` : "";
+    if (day !== "all") played = played.filter((f) => fixtureMatchday(f) === day);
+    if (!played.length) { showToast(day === "all" ? "No results to download yet." : "No results for that matchday.", "error"); return; }
+    const titleSuffix = day !== "all" ? ` — Matchday ${day}` : "";
     const blocks = def.type === "groups"
       ? groupKeysUsed().map((g) => exportResultsTableBlock(`Group ${g}${titleSuffix}`, played.filter((f) => f.group === g).sort((a, b) => a.round - b.round), teamName)).join("")
       : exportResultsTableBlock(`All Results${titleSuffix}`, played.sort((a, b) => sortByDateTime(b, a)), teamName);
-    openExportDocument({ docTitle: day !== "all" ? `Results — ${formatMatchDayLabel(day)}` : "Results", tournamentName: t.name, formatLabel: def.label, generatedNote: `${played.length} results`, tableBlocksHTML: blocks });
+    openExportDocument({ docTitle: day !== "all" ? `Results — Matchday ${day}` : "Results", tournamentName: t.name, formatLabel: def.label, generatedNote: `${played.length} results`, tableBlocksHTML: blocks });
   });
 
   $("#stPublicDownloadBtn").addEventListener("click", () => {
@@ -695,6 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateOnlineStatus();
   initSecretAdminEntry();
   initDownloadButtons();
+  initPublicMatchdayFilters();
   initServiceWorker();
   initInstallPrompt();
   navigateTo(location.hash.replace("#", "") || "home");
